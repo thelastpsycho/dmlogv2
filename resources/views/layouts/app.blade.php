@@ -692,6 +692,9 @@
                                 this.startDate = dateStr;
                                 this.endDate = '';
                                 this.selecting = 'end';
+                                // Sync to Livewire
+                                if (this.wirePropertyStart) this.$wire.set(this.wirePropertyStart, this.startDate);
+                                if (this.wirePropertyEnd) this.$wire.set(this.wirePropertyEnd, '');
                             } else {
                                 // We have startDate, need to set endDate
                                 if (dateStr < this.startDate) {
@@ -702,6 +705,9 @@
                                     this.endDate = dateStr;
                                 }
                                 this.selecting = 'complete';
+                                // Sync to Livewire
+                                if (this.wirePropertyStart) this.$wire.set(this.wirePropertyStart, this.startDate);
+                                if (this.wirePropertyEnd) this.$wire.set(this.wirePropertyEnd, this.endDate);
                             }
                         },
 
@@ -717,6 +723,9 @@
                             this.startDate = '';
                             this.endDate = '';
                             this.selecting = 'start';
+                            // Sync to Livewire
+                            if (this.wirePropertyStart) this.$wire.set(this.wirePropertyStart, '');
+                            if (this.wirePropertyEnd) this.$wire.set(this.wirePropertyEnd, '');
                         }
                     };
                 };
