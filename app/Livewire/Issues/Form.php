@@ -41,14 +41,14 @@ class Form extends Component
     #[Rule(['nullable', 'string', 'max:50'])]
     public ?string $room_number = null;
 
-    #[Rule(['nullable', 'date'])]
-    public ?string $checkin_date = null;
+    #[Rule(['required', 'filled', 'date'])]
+    public string $checkin_date = '';
 
-    #[Rule(['nullable', 'date'])]
-    public ?string $checkout_date = null;
+    #[Rule(['required', 'filled', 'date'])]
+    public string $checkout_date = '';
 
-    #[Rule(['nullable', 'date'])]
-    public ?string $issue_date = null;
+    #[Rule(['required', 'filled', 'date'])]
+    public string $issue_date = '';
 
     #[Rule(['nullable', 'string', 'max:255'])]
     public ?string $source = null;
@@ -98,9 +98,9 @@ class Form extends Component
             // Guest details
             $this->name = $issue->name;
             $this->room_number = $issue->room_number;
-            $this->checkin_date = $issue->checkin_date?->format('Y-m-d');
-            $this->checkout_date = $issue->checkout_date?->format('Y-m-d');
-            $this->issue_date = $issue->issue_date?->format('Y-m-d');
+            $this->checkin_date = $issue->checkin_date?->format('Y-m-d') ?? '';
+            $this->checkout_date = $issue->checkout_date?->format('Y-m-d') ?? '';
+            $this->issue_date = $issue->issue_date?->format('Y-m-d') ?? '';
             $this->source = $issue->source;
             $this->nationality = $issue->nationality;
             $this->contact = $issue->contact;
@@ -117,6 +117,9 @@ class Form extends Component
     public function save()
     {
         $this->validate([
+            'checkin_date' => ['required', 'filled', 'date'],
+            'checkout_date' => ['required', 'filled', 'date'],
+            'issue_date' => ['required', 'filled', 'date'],
             'department_ids' => ['required', 'array', 'min:1'],
             'department_ids.*' => ['exists:departments,id'],
             'issue_type_ids' => ['required', 'array', 'min:1'],
@@ -134,9 +137,9 @@ class Form extends Component
             // Guest details
             'name' => $this->name,
             'room_number' => $this->room_number,
-            'checkin_date' => $this->checkin_date ?: null,
-            'checkout_date' => $this->checkout_date ?: null,
-            'issue_date' => $this->issue_date ?: null,
+            'checkin_date' => $this->checkin_date,
+            'checkout_date' => $this->checkout_date,
+            'issue_date' => $this->issue_date,
             'source' => $this->source,
             'nationality' => $this->nationality,
             'contact' => $this->contact,

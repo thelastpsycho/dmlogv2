@@ -551,13 +551,15 @@
                         today: new Date(),
                         wirePropertyStart: config.wirePropertyStart || null,
                         wirePropertyEnd: config.wirePropertyEnd || null,
+                        viewStartMonth: new Date().getMonth(),
+                        viewStartYear: new Date().getFullYear(),
 
                         get firstMonth() {
-                            return new Date(this.today.getFullYear(), this.today.getMonth(), 1);
+                            return new Date(this.viewStartYear, this.viewStartMonth, 1);
                         },
 
                         get secondMonth() {
-                            const nextMonth = new Date(this.today.getFullYear(), this.today.getMonth() + 1, 1);
+                            const nextMonth = new Date(this.viewStartYear, this.viewStartMonth + 1, 1);
                             return nextMonth;
                         },
 
@@ -602,6 +604,41 @@
 
                         open() {
                             this.isOpen = true;
+                            // Initialize view to show selected dates or current month
+                            if (this.startDate) {
+                                const start = new Date(this.startDate + 'T00:00:00');
+                                this.viewStartMonth = start.getMonth();
+                                this.viewStartYear = start.getFullYear();
+                            } else {
+                                this.viewStartMonth = this.today.getMonth();
+                                this.viewStartYear = this.today.getFullYear();
+                            }
+                        },
+
+                        prevMonths() {
+                            // Go back by 2 months to show the previous pair
+                            if (this.viewStartMonth === 1) {
+                                this.viewStartMonth = 11;
+                                this.viewStartYear--;
+                            } else if (this.viewStartMonth === 0) {
+                                this.viewStartMonth = 10;
+                                this.viewStartYear--;
+                            } else {
+                                this.viewStartMonth -= 2;
+                            }
+                        },
+
+                        nextMonths() {
+                            // Go forward by 2 months to show the next pair
+                            if (this.viewStartMonth === 11) {
+                                this.viewStartMonth = 1;
+                                this.viewStartYear++;
+                            } else if (this.viewStartMonth === 10) {
+                                this.viewStartMonth = 0;
+                                this.viewStartYear++;
+                            } else {
+                                this.viewStartMonth += 2;
+                            }
                         },
 
                         close() {
@@ -650,32 +687,21 @@
                         selectDate(year, month, day) {
                             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
+                            // If we have both dates, or no dates, start fresh
                             if (!this.startDate || (this.startDate && this.endDate)) {
                                 this.startDate = dateStr;
                                 this.endDate = '';
                                 this.selecting = 'end';
-                                // Sync to Livewire
-                                if (this.$wire && this.wirePropertyStart) {
-                                    this.$wire.set(this.wirePropertyStart, this.startDate);
-                                }
-                                if (this.$wire && this.wirePropertyEnd) {
-                                    this.$wire.set(this.wirePropertyEnd, '');
-                                }
                             } else {
+                                // We have startDate, need to set endDate
                                 if (dateStr < this.startDate) {
+                                    // User clicked a date before startDate - swap them
                                     this.endDate = this.startDate;
                                     this.startDate = dateStr;
                                 } else {
                                     this.endDate = dateStr;
                                 }
-                                this.selecting = 'start';
-                                // Sync to Livewire
-                                if (this.$wire && this.wirePropertyStart) {
-                                    this.$wire.set(this.wirePropertyStart, this.startDate);
-                                }
-                                if (this.$wire && this.wirePropertyEnd) {
-                                    this.$wire.set(this.wirePropertyEnd, this.endDate);
-                                }
+                                this.selecting = 'complete';
                             }
                         },
 
@@ -691,13 +717,6 @@
                             this.startDate = '';
                             this.endDate = '';
                             this.selecting = 'start';
-                            // Sync to Livewire
-                            if (this.$wire && this.wirePropertyStart) {
-                                this.$wire.set(this.wirePropertyStart, '');
-                            }
-                            if (this.$wire && this.wirePropertyEnd) {
-                                this.$wire.set(this.wirePropertyEnd, '');
-                            }
                         }
                     };
                 };

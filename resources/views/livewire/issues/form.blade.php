@@ -286,14 +286,14 @@
                     </div>
 
                     <!-- Date Row -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="flex flex-col sm:flex-row gap-4 mt-4">
                         <!-- Check-in / Check-out Date Range -->
-                        <div class="space-y-1.5" x-data="dateRangePicker({ startDate: @js($checkin_date), endDate: @js($checkout_date), wirePropertyStart: 'checkin_date', wirePropertyEnd: 'checkout_date' })">
+                        <div class="space-y-1.5 flex-1 min-w-0" x-data="dateRangePicker({ startDate: @js($checkin_date), endDate: @js($checkout_date), wirePropertyStart: 'checkin_date', wirePropertyEnd: 'checkout_date' })">
                             <label class="text-sm font-medium text-text flex items-center gap-1.5">
                                 <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                Check-in / Check-out
+                                Check-in / Check-out <span class="text-danger">*</span>
                             </label>
                             <div class="relative">
                                 <input type="hidden" :value="startDate">
@@ -319,10 +319,31 @@
                                     x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                                     x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
                                     @click.outside="close()"
-                                    class="absolute z-50 mt-2 w-full bg-surface border border-border rounded-xl shadow-xl shadow-black/10 overflow-hidden p-4"
+                                    class="absolute z-50 mt-2 w-full bg-surface border border-border rounded-xl shadow-xl shadow-black/10 overflow-hidden"
                                     style="display: none;"
                                 >
-                                    <div class="flex gap-4">
+                                    <!-- Header with navigation -->
+                                    <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+                                        <button type="button" @click="prevMonths()" class="p-1.5 hover:bg-surface-2 rounded-lg transition-colors" title="Previous months">
+                                            <svg class="w-4 h-4 text-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                        </button>
+                                        <span class="text-sm font-semibold text-text">
+                                            <span x-text="monthNames[firstMonth.getMonth()]"></span>
+                                            <span class="text-muted/60 mx-1">–</span>
+                                            <span x-text="monthNames[secondMonth.getMonth()]"></span>
+                                            <span class="text-muted/60 ml-1" x-text="firstMonth.getFullYear()"></span>
+                                        </span>
+                                        <button type="button" @click="nextMonths()" class="p-1.5 hover:bg-surface-2 rounded-lg transition-colors" title="Next months">
+                                            <svg class="w-4 h-4 text-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <div class="p-4">
+                                        <div class="flex gap-4">
                                         <template x-for="monthIdx in [0, 1]">
                                             <div class="flex-1">
                                                 <div class="text-center text-sm font-medium text-text mb-3" x-text="monthNames[(firstMonth.getMonth() + monthIdx) % 12] + ' ' + (firstMonth.getFullYear() + Math.floor((firstMonth.getMonth() + monthIdx) / 12))"></div>
@@ -353,8 +374,9 @@
                                             </div>
                                         </template>
                                     </div>
+                                    </div>
 
-                                    <div class="mt-3 pt-3 border-t border-border flex items-center justify-between">
+                                    <div class="px-4 py-3 border-t border-border flex items-center justify-between">
                                         <div class="text-sm text-text">
                                             <span x-show="startDate" class="text-primary font-medium" x-text="startDate ? new Date(startDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''"></span>
                                             <span x-show="startDate && endDate" class="text-muted mx-1.5">→</span>
@@ -375,12 +397,12 @@
                         </div>
 
                         <!-- Issue Date -->
-                        <div class="space-y-1.5" x-data="datePicker({ value: @js($issue_date), wireProperty: 'issue_date' })">
+                        <div class="space-y-1.5 flex-1 min-w-0" x-data="datePicker({ value: @js($issue_date), wireProperty: 'issue_date' })">
                             <label class="text-sm font-medium text-text flex items-center gap-1.5">
                                 <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                Issue Date
+                                Issue Date <span class="text-danger">*</span>
                             </label>
                             <div class="relative">
                                 <input type="hidden" :value="value">
@@ -529,7 +551,7 @@
                         <!-- Departments Multi-Select -->
                         <div class="space-y-1.5" x-data="multiSelect({
                             selected: @js($department_ids),
-                            options: @js(array_map(fn($id, $name) => ['id' => $id, 'name' => $name], array_keys($this->departments), $this->departments)),
+                            options: @js(collect($this->departments)->map(fn($name, $id) => ['id' => (string)$id, 'name' => $name])->values()->toArray()),
                             wireProperty: 'department_ids'
                         })" x-init="init()" wire:key="departments-{{ implode(',', $department_ids) }}">
                             <label class="text-sm font-medium text-text">Departments <span class="text-danger">*</span></label>
@@ -626,7 +648,7 @@
                         <!-- Issue Types Multi-Select -->
                         <div class="space-y-1.5" x-data="multiSelect({
                             selected: @js($issue_type_ids),
-                            options: @js(array_map(fn($id, $name) => ['id' => $id, 'name' => $name], array_keys($this->issueTypes), $this->issueTypes)),
+                            options: @js(collect($this->issueTypes)->map(fn($name, $id) => ['id' => (string)$id, 'name' => $name])->values()->toArray()),
                             wireProperty: 'issue_type_ids'
                         })" x-init="init()" wire:key="issue-types-{{ implode(',', $issue_type_ids) }}">
                             <label class="text-sm font-medium text-text">Issue Types <span class="text-danger">*</span></label>
