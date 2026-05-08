@@ -288,7 +288,7 @@
                     <!-- Date Row -->
                     <div class="flex flex-col sm:flex-row gap-4 mt-4">
                         <!-- Check-in / Check-out Date Range -->
-                        <div class="space-y-1.5 flex-1 min-w-0" x-data="dateRangePicker({ startDate: @js($checkin_date), endDate: @js($checkout_date), wirePropertyStart: 'checkin_date', wirePropertyEnd: 'checkout_date' })">
+                        <div class="space-y-1.5 flex-1 min-w-0" x-data="dateRangePicker({ startDate: @js($checkin_date), endDate: @js($checkout_date), wirePropertyStart: 'checkin_date', wirePropertyEnd: 'checkout_date', commitMethod: 'syncCheckinCheckoutDates' })">
                             <label class="text-sm font-medium text-text flex items-center gap-1.5">
                                 <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

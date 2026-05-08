@@ -2,15 +2,15 @@
 
 namespace App\Livewire\Issues;
 
-use App\Models\Issue;
+use App\Exceptions\AIException;
 use App\Models\Department;
+use App\Models\Issue;
 use App\Models\IssueType;
 use App\Models\User;
-use App\Services\IssueService;
 use App\Services\IssueAIService;
-use App\Exceptions\AIException;
-use Livewire\Component;
+use App\Services\IssueService;
 use Livewire\Attributes\Rule;
+use Livewire\Component;
 
 class Form extends Component
 {
@@ -29,6 +29,7 @@ class Form extends Component
     public ?string $location = null;
 
     public array $department_ids = [];
+
     public array $issue_type_ids = [];
 
     #[Rule(['nullable', 'exists:users,id'])]
@@ -74,6 +75,7 @@ class Form extends Component
     public bool $aiLoading = false;
 
     protected IssueService $issueService;
+
     protected IssueAIService $aiService;
 
     public function boot(IssueService $issueService, IssueAIService $aiService): void
@@ -112,6 +114,16 @@ class Form extends Component
         } else {
             $this->authorize('create', Issue::class);
         }
+    }
+
+    /**
+     * Applies check-in and check-out from the range picker in one request so Livewire does not
+     * re-render after the first date tap (which was resetting Alpine and breaking range selection).
+     */
+    public function syncCheckinCheckoutDates(string $checkin, string $checkout): void
+    {
+        $this->checkin_date = $checkin;
+        $this->checkout_date = $checkout;
     }
 
     public function save()
@@ -183,6 +195,7 @@ class Form extends Component
         // Validate description length
         if (empty($this->description) || strlen($this->description) < 10) {
             session()->flash('ai_error', '⚠️ Please enter at least 10 characters in the description before using AI enhancement.');
+
             return;
         }
 
@@ -220,7 +233,7 @@ class Form extends Component
             session()->put('ai_failure_time', now());
             session()->put('ai_error', $e->getType()->value);
 
-            session()->flash('ai_error', '⚠️ ' . $e->getUserMessage());
+            session()->flash('ai_error', '⚠️ '.$e->getUserMessage());
 
             // Log for admin
             \Log::warning('AI Enhancement Failed', [
@@ -243,19 +256,23 @@ class Form extends Component
     public function getAiAvailableProperty(): bool
     {
         // Check if AI feature is enabled in config
-        if (!config('services.ai.enabled', true)) {
+        if (! config('services.ai.enabled', true)) {
             \Log::info('AI feature disabled in config');
+
             return false;
         }
 
         // Check if API key is configured
         if (empty(config('services.deepseek.api_key'))) {
             \Log::warning('DeepSeek API key not configured');
+
             return false;
         }
 
         $lastFailure = session()->get('ai_failure_time');
-        if (!$lastFailure) return true;
+        if (! $lastFailure) {
+            return true;
+        }
 
         $cooldownMinutes = config('services.ai.failure_cooldown_minutes', 5);
         $minutesSinceFailure = now()->diffInMinutes($lastFailure);
@@ -278,13 +295,16 @@ class Form extends Component
     public function getAiRetryAfterProperty(): ?string
     {
         $lastFailure = session()->get('ai_failure_time');
-        if (!$lastFailure) return null;
+        if (! $lastFailure) {
+            return null;
+        }
 
         $cooldownMinutes = config('services.ai.failure_cooldown_minutes', 5);
         $retryAt = $lastFailure->addMinutes($cooldownMinutes);
 
         if (now()->gte($retryAt)) {
             session()->forget('ai_failure_time');
+
             return null;
         }
 
