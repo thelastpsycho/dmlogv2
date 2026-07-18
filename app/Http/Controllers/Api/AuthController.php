@@ -20,7 +20,7 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        $user = \App\Models\User::where('email', $request->email)->first();
+        $user = \App\Models\User::with('roles')->where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
@@ -73,8 +73,11 @@ class AuthController extends Controller
      */
     public function me(): JsonResponse
     {
+        $user = Auth::user();
+        $user->load('roles');
+
         return response()->json([
-            'user' => new UserResource(Auth::user()),
+            'user' => new UserResource($user),
         ], 200);
     }
 }

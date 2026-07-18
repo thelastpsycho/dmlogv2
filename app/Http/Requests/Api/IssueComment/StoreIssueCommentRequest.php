@@ -26,7 +26,6 @@ class StoreIssueCommentRequest extends FormRequest
     {
         return [
             'issue_id' => ['required', 'exists:issues,id'],
-            'user_id' => ['required', 'exists:users,id'],
             'body' => ['required', 'string'],
         ];
     }

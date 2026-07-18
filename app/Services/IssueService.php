@@ -84,6 +84,24 @@ class IssueService
     }
 
     /**
+     * Verify a closed issue.
+     */
+    public function verify(Issue $issue, ?string $note = null): Issue
+    {
+        return DB::transaction(function () use ($issue, $note) {
+            $issue->update([
+                'status' => 'verified',
+                'verified_at' => now(),
+                'verified_by_user_id' => Auth::id(),
+            ]);
+
+            $this->logActivity($issue, 'verified', "Issue was verified" . ($note ? ": {$note}" : ''));
+
+            return $issue->fresh();
+        });
+    }
+
+    /**
      * Reopen a closed issue.
      */
     public function reopen(Issue $issue, ?string $note = null): Issue
@@ -93,6 +111,8 @@ class IssueService
                 'status' => 'open',
                 'closed_at' => null,
                 'closed_by_user_id' => null,
+                'verified_at' => null,
+                'verified_by_user_id' => null,
             ]);
 
             $this->logActivity($issue, 'reopened', "Issue was reopened" . ($note ? ": {$note}" : ''));

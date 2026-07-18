@@ -22,6 +22,14 @@ class ActivityLog extends Model
     ];
 
     /**
+     * Get the description from meta.
+     */
+    protected function getDescriptionAttribute(): string
+    {
+        return $this->meta['description'] ?? '';
+    }
+
+    /**
      * The attributes that should be hidden for serialization.
      */
     protected $hidden = [

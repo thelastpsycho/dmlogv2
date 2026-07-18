@@ -12,8 +12,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Configure API middleware for token-based authentication
         $middleware->api(prepend: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            // Removed stateful middleware to allow Bearer token authentication
+            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        ]);
+
+        // Exclude login route from CSRF protection
+        $middleware->validateCsrfTokens(except: [
+            'api/login',
+            'api/*',
         ]);
 
         $middleware->redirectGuestsTo(function ($request) {

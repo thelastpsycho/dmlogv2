@@ -140,6 +140,20 @@ class User extends Authenticatable
     }
 
     /**
+     * Get all permissions from all of the user's roles.
+     */
+    public function getAllPermissions(): \Illuminate\Support\Collection
+    {
+        $permissions = collect();
+
+        foreach ($this->roles as $role) {
+            $permissions = $permissions->merge($role->permissions);
+        }
+
+        return $permissions->unique('id')->values();
+    }
+
+    /**
      * Check if user has a specific role.
      */
     public function hasRole(string $role): bool

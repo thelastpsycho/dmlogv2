@@ -28,7 +28,10 @@ class StoreUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
+            'department' => ['nullable', 'string', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
+            'roles' => ['nullable', 'array'],
+            'roles.*.id' => ['exists:roles,id'],
             'role_ids' => ['nullable', 'array'],
             'role_ids.*' => ['exists:roles,id'],
         ];

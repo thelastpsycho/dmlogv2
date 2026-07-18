@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Issue extends Model
@@ -35,6 +36,8 @@ class Issue extends Model
         'assigned_to_user_id',
         'closed_at',
         'closed_by_user_id',
+        'verified_at',
+        'verified_by_user_id',
         'issue_type_id',
     ];
 
@@ -45,6 +48,7 @@ class Issue extends Model
             'checkout_date' => 'date',
             'issue_date' => 'date',
             'closed_at' => 'datetime',
+            'verified_at' => 'datetime',
             'recovery_cost' => 'integer',
         ];
     }
@@ -109,6 +113,14 @@ class Issue extends Model
     }
 
     /**
+     * Get the user who verified the issue.
+     */
+    public function verifiedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by_user_id');
+    }
+
+    /**
      * Get the comments for the issue.
      */
     public function comments(): HasMany
@@ -119,7 +131,7 @@ class Issue extends Model
     /**
      * Get the activity logs for the issue.
      */
-    public function activityLogs(): HasMany
+    public function activityLogs(): MorphMany
     {
         return $this->morphMany(ActivityLog::class, 'subject');
     }
@@ -141,11 +153,27 @@ class Issue extends Model
     }
 
     /**
+     * Scope a query to only include verified issues.
+     */
+    public function scopeVerified($query)
+    {
+        return $query->where('status', 'verified');
+    }
+
+    /**
      * Check if issue is closed.
      */
     public function isClosed(): bool
     {
         return $this->status === 'closed';
+    }
+
+    /**
+     * Check if issue is verified.
+     */
+    public function isVerified(): bool
+    {
+        return $this->status === 'verified';
     }
 
     /**
@@ -161,6 +189,18 @@ class Issue extends Model
     }
 
     /**
+     * Verify the issue.
+     */
+    public function verify(int $verifiedByUserId): void
+    {
+        $this->update([
+            'status' => 'verified',
+            'verified_at' => now(),
+            'verified_by_user_id' => $verifiedByUserId,
+        ]);
+    }
+
+    /**
      * Reopen the issue.
      */
     public function reopen(): void
@@ -169,6 +209,8 @@ class Issue extends Model
             'status' => 'open',
             'closed_at' => null,
             'closed_by_user_id' => null,
+            'verified_at' => null,
+            'verified_by_user_id' => null,
         ]);
     }
 }

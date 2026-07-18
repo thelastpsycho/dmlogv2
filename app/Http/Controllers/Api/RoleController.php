@@ -15,7 +15,7 @@ class RoleController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = Role::query();
+        $query = Role::query()->with('permissions');
 
         // Search
         if ($request->has('search')) {

@@ -37,7 +37,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('api.login');
 #public route for issues
 Route::get('/all-issues', [IssueController::class, 'index'])->name('api.issues.index');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     // Authentication routes
     Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout');
     Route::get('/me', [AuthController::class, 'me'])->name('api.me');
@@ -57,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
         Route::apiResource('issues', IssueController::class);
         Route::post('/issues/{issue}/close', [IssueController::class, 'close'])->name('issues.close');
         Route::post('/issues/{issue}/reopen', [IssueController::class, 'reopen'])->name('issues.reopen');
+        Route::post('/issues/{issue}/verify', [IssueController::class, 'verify'])->name('issues.verify');
         Route::get('/issues/{issue}/comments', [IssueCommentController::class, 'index'])->name('issues.comments');
 
         // Bulk operations

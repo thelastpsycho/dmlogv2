@@ -16,7 +16,7 @@ class UserController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = User::query();
+        $query = User::with('roles');
 
         // Filter by role
         if ($request->has('role_id')) {
@@ -47,20 +47,56 @@ class UserController extends Controller
 
     public function show(User $user): UserResource
     {
-        $user->load(['roles', 'permissions']);
+        $user->load('roles');
         return new UserResource($user);
     }
 
     public function store(StoreUserRequest $request): UserResource
     {
-        $user = User::create($request->validated());
+        $data = $request->validated();
+
+        // Handle password
+        if (isset($data['password'])) {
+            $data['password'] = bcrypt($data['password']);
+        }
+
+        $user = User::create($data);
+
+        // Sync roles if provided
+        if (isset($data['roles']) && is_array($data['roles'])) {
+            $roleIds = collect($data['roles'])->pluck('id')->filter()->toArray();
+            if (!empty($roleIds)) {
+                $user->roles()->sync($roleIds);
+            }
+        } elseif (isset($data['role_ids']) && is_array($data['role_ids'])) {
+            $user->roles()->sync($data['role_ids']);
+        }
+
         $user->load('roles');
         return new UserResource($user);
     }
 
     public function update(UpdateUserRequest $request, User $user): UserResource
     {
-        $user->update($request->validated());
+        $data = $request->validated();
+
+        // Handle password update
+        if (isset($data['password'])) {
+            $data['password'] = bcrypt($data['password']);
+        }
+
+        $user->update($data);
+
+        // Sync roles if provided
+        if (isset($data['roles']) && is_array($data['roles'])) {
+            $roleIds = collect($data['roles'])->pluck('id')->filter()->toArray();
+            if (!empty($roleIds)) {
+                $user->roles()->sync($roleIds);
+            }
+        } elseif (isset($data['role_ids']) && is_array($data['role_ids'])) {
+            $user->roles()->sync($data['role_ids']);
+        }
+
         $user->load('roles');
         return new UserResource($user);
     }

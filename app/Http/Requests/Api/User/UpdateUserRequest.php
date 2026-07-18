@@ -30,7 +30,10 @@ class UpdateUserRequest extends FormRequest
             'name' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'unique:users,email,' . $userId],
             'password' => ['nullable', 'string', 'min:8'],
+            'department' => ['nullable', 'string', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
+            'roles' => ['nullable', 'array'],
+            'roles.*.id' => ['exists:roles,id'],
             'role_ids' => ['nullable', 'array'],
             'role_ids.*' => ['exists:roles,id'],
         ];

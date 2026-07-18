@@ -25,6 +25,7 @@ class PermissionsSeeder extends Seeder
             ['name' => 'issues.delete.own', 'description' => 'Delete own issues'],
             ['name' => 'issues.close', 'description' => 'Close issues'],
             ['name' => 'issues.reopen', 'description' => 'Reopen closed issues'],
+            ['name' => 'issues.verify', 'description' => 'Verify closed issues'],
             ['name' => 'issues.export', 'description' => 'Export issues to PDF'],
             ['name' => 'issues.export.open', 'description' => 'Export open issues to PDF'],
 

@@ -74,11 +74,19 @@ class IssuePolicy
     }
 
     /**
+     * Determine if the user can verify a specific issue.
+     */
+    public function verify(User $user, Issue $issue): bool
+    {
+        return $user->can('issues.verify') && $issue->status === 'closed';
+    }
+
+    /**
      * Determine if the user can reopen a specific issue.
      */
     public function reopen(User $user, Issue $issue): bool
     {
-        return $user->can('issues.reopen') && $issue->status === 'closed';
+        return $user->can('issues.reopen') && ($issue->status === 'closed' || $issue->status === 'verified');
     }
 
     /**

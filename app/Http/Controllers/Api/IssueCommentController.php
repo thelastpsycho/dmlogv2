@@ -41,7 +41,10 @@ class IssueCommentController extends Controller
 
     public function store(StoreIssueCommentRequest $request): IssueCommentResource
     {
-        $comment = IssueComment::create($request->validated());
+        $data = $request->validated();
+        $data['user_id'] = auth()->id();
+
+        $comment = IssueComment::create($data);
         $comment->load(['user', 'issue']);
         return new IssueCommentResource($comment);
     }
