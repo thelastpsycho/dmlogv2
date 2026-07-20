@@ -183,15 +183,23 @@ class IssueService
 
         // Filter by department
         if (!empty($filters['department_id'])) {
-            $query->whereHas('departments', function ($q) use ($filters) {
-                $q->where('departments.id', $filters['department_id']);
+            $departmentIds = is_array($filters['department_id'])
+                ? $filters['department_id']
+                : explode(',', $filters['department_id']);
+
+            $query->whereHas('departments', function ($q) use ($departmentIds) {
+                $q->whereIn('departments.id', $departmentIds);
             });
         }
 
         // Filter by issue type
         if (!empty($filters['issue_type_id'])) {
-            $query->whereHas('issueTypes', function ($q) use ($filters) {
-                $q->where('issue_types.id', $filters['issue_type_id']);
+            $issueTypeIds = is_array($filters['issue_type_id'])
+                ? $filters['issue_type_id']
+                : explode(',', $filters['issue_type_id']);
+
+            $query->whereHas('issueTypes', function ($q) use ($issueTypeIds) {
+                $q->whereIn('issue_types.id', $issueTypeIds);
             });
         }
 

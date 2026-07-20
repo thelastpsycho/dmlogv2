@@ -26,6 +26,7 @@ return [
         'http://127.0.0.1:5174',
         'http://10.201.250.238:5173',
         'https://pulse.anvayabali.com',
+        'https://pulse-api.anvayabali.com',
         'https://pulsev2-nu.vercel.app',
     ],
 

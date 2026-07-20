@@ -38,15 +38,23 @@ class IssueController extends Controller
 
         // Filter by department
         if ($request->has('department_id')) {
-            $query->whereHas('departments', function ($q) use ($request) {
-                $q->where('departments.id', $request->department_id);
+            $departmentIds = is_array($request->department_id)
+                ? $request->department_id
+                : explode(',', $request->department_id);
+
+            $query->whereHas('departments', function ($q) use ($departmentIds) {
+                $q->whereIn('departments.id', $departmentIds);
             });
         }
 
         // Filter by issue type
         if ($request->has('issue_type_id')) {
-            $query->whereHas('issueTypes', function ($q) use ($request) {
-                $q->where('issue_types.id', $request->issue_type_id);
+            $issueTypeIds = is_array($request->issue_type_id)
+                ? $request->issue_type_id
+                : explode(',', $request->issue_type_id);
+
+            $query->whereHas('issueTypes', function ($q) use ($issueTypeIds) {
+                $q->whereIn('issue_types.id', $issueTypeIds);
             });
         }
 
