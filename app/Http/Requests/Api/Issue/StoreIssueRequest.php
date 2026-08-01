@@ -36,7 +36,7 @@ class StoreIssueRequest extends FormRequest
             'source' => ['nullable', 'string', 'max:100'],
             'nationality' => ['nullable', 'string', 'max:100'],
             'contact' => ['nullable', 'string', 'max:100'],
-            'recovery' => ['nullable', 'string', 'max:255'],
+            'recovery' => ['nullable', 'string'],
             'recovery_cost' => ['nullable', 'integer'],
             'training' => ['nullable', 'boolean'],
             'priority' => ['required', 'in:low,medium,high,urgent'],
