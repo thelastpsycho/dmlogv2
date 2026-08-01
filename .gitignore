@@ -36,6 +36,7 @@ composer.lock
 /auth.json
 Homestead.json
 Homestead.yaml
+/.claude/worktrees
 
 ### Logs ###
 *.log
