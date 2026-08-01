@@ -32,9 +32,10 @@ class AiToolsService
         return [$start, now()];
     }
 
-    public function summary(?string $period = 'last_week', ?string $startDate = null, ?string $endDate = null): array
+    public function summary(?string $period = 'last_week', ?string $startDate = null, ?string $endDate = null, int $limit = 25): array
     {
         [$start, $end] = $this->resolveRange($period, $startDate, $endDate);
+        $limit = min($limit, 50);
 
         $cacheKey = 'ai:summary:'.$start->format('Y-m-d').':'.$end->format('Y-m-d');
 
@@ -54,6 +55,12 @@ class AiToolsService
         $totalIssues = (int) $stats->total_issues;
         $closedIssues = (int) $stats->closed_issues;
 
+        $issues = Issue::whereBetween('created_at', [$start, $end])
+            ->with('departments')
+            ->latest()
+            ->limit($limit)
+            ->get();
+
         return [
             'period' => [
                 'start' => $start->format('Y-m-d'),
@@ -69,6 +76,8 @@ class AiToolsService
                 'avg_resolution_hours' => round($stats->avg_resolution_hours ?? 0, 1),
                 'closure_rate' => $totalIssues > 0 ? round(($closedIssues / $totalIssues) * 100, 1) : 0,
             ],
+            'issues_returned' => $issues->count(),
+            'issues' => $issues->map(fn (Issue $issue) => $this->compactIssue($issue))->all(),
         ];
     }
 
@@ -77,6 +86,7 @@ class AiToolsService
         $limit = min($limit, 50);
 
         $issues = Issue::where('room_number', 'like', "%{$roomNumber}%")
+            ->with('departments')
             ->latest()
             ->limit($limit)
             ->get();
@@ -93,6 +103,7 @@ class AiToolsService
         $limit = min($limit, 50);
 
         $issues = Issue::where('name', 'like', "%{$guestName}%")
+            ->with('departments')
             ->latest()
             ->limit($limit)
             ->get();
@@ -159,6 +170,7 @@ class AiToolsService
 
         $issues = Issue::where('priority', 'urgent')
             ->where('status', '!=', 'closed')
+            ->with('departments')
             ->latest()
             ->limit($limit)
             ->get();
@@ -174,12 +186,14 @@ class AiToolsService
         return [
             'id' => $issue->id,
             'title' => $issue->title,
-            'description' => Str::limit($issue->description ?? '', 150),
+            'description' => Str::limit($issue->description ?? '', 300),
+            'recovery' => Str::limit($issue->recovery ?? '', 300),
             'status' => $issue->status,
             'priority' => $issue->priority,
             'location' => $issue->location,
             'room_number' => $issue->room_number,
             'guest_name' => $issue->name,
+            'department' => $issue->departments->pluck('name')->implode(', ') ?: null,
             'created_at' => optional($issue->created_at)->toDateTimeString(),
             'closed_at' => optional($issue->closed_at)->toDateTimeString(),
         ];

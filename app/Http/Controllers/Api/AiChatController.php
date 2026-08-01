@@ -26,6 +26,7 @@ class AiChatController extends Controller
                 $request->input('period', 'last_week'),
                 $request->input('start_date'),
                 $request->input('end_date'),
+                (int) $request->input('limit', 25),
             ),
             'room-search' => $this->tools->roomSearch(
                 $request->validate(['room_number' => 'required|string'])['room_number'],
