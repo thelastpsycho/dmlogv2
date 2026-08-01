@@ -70,6 +70,9 @@ class PermissionsSeeder extends Seeder
             // Graphs
             ['name' => 'graphs.view', 'description' => 'View graphs'],
             ['name' => 'statistics.view', 'description' => 'View statistics dashboard'],
+
+            // AI Assistant
+            ['name' => 'ai.chat.view', 'description' => 'Access AI chat assistant'],
         ];
 
         foreach ($permissions as $permission) {

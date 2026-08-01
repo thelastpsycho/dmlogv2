@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ActivityLogController;
+use App\Http\Controllers\Api\AiChatController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\DmLogBookController;
@@ -51,6 +52,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/statistics/by-department', [StatisticsController::class, 'byDepartment'])->name('api.statistics.by-department');
     Route::get('/statistics/by-user', [StatisticsController::class, 'byUser'])->name('api.statistics.by-user');
     Route::get('/statistics/trends', [StatisticsController::class, 'trends'])->name('api.statistics.trends');
+
+    // AI Chat tools
+    Route::post('/ai/tools/{name}', [AiChatController::class, 'handle'])->name('api.ai.tools');
 
     // Issues API
     Route::name('api.')->group(function () {
